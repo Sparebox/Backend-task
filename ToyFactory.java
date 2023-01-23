@@ -1,69 +1,109 @@
+import java.util.HashMap;
+import java.util.Map;
+
 public class ToyFactory {
-    static int PRODUCTION_RATE = 500; // toys per hour
-
+    private int productionRate; // toys per hour
+    private long hoursSpentWaiting;
     private int toysProduced;
-    private int numOfFurs;
-    private int numOfFillings;
-    private int numOfNoses;
-    private int numOfEyes;
+    private ToyRecipe toyRecipe;
+    private Map<Component, Integer> components;
 
+    public ToyFactory(int productionRate) {
+        this.productionRate = productionRate;
+        this.components = new HashMap<>();
+        this.toyRecipe = new ToyRecipe();
+
+        // Initialize with recipe to make weasel soft toys
+        this.components.put(Component.FUR, 0);
+        this.components.put(Component.FILLING, 0);
+        this.components.put(Component.NOSE, 0);
+        this.components.put(Component.EYE, 0);
+
+        this.toyRecipe.addComponent(Component.FUR, 1);
+        this.toyRecipe.addComponent(Component.FILLING, 1);
+        this.toyRecipe.addComponent(Component.NOSE, 1);
+        this.toyRecipe.addComponent(Component.EYE, 2);
+    }
+
+    /**
+     * Advances this toy factory one step (hour) forward in the simulation.
+     * The factory produces toys if there are enough components available.
+     * <p>
+     * Otherwise adds one hour to waiting hours counter and does nothing.
+     * @return The number of toys produced during this tick
+     */
     public int tick() {
-        boolean enoughComponents = 
-            numOfFurs > 0 && numOfFillings > 0 && numOfNoses > 0 && numOfEyes > 1;
-        
-        if(!enoughComponents) {
-            // No toys were produced this tick
+        if(!this.toyRecipe.canProduceWith(this.components, this.productionRate)) {
+            // No toys could be produced during this tick
+            this.hoursSpentWaiting++;
             return 0;
         }
 
-        // Update stored component counts and total toys
-        this.numOfEyes -= 2;
-        this.numOfFurs -= 1;
-        this.numOfNoses -= 1;
-        this.numOfFillings -= 1;
-        this.toysProduced += PRODUCTION_RATE;
+        // Producing toys decreases the number of stored components and increases total toy count
+        this.toysProduced += this.toyRecipe.produce(this.components, this.productionRate);
 
-        // Return toys produced this tick
-        return PRODUCTION_RATE;
+        // Return toys produced during this tick
+        return this.productionRate;
+    }
+    /**
+     * Calculates the utilization rate of this factory using the {@code hoursSpentWaiting} class variable.
+     * @param hoursPassed Hours passed since this factory started operating
+     * @return The utilization rate of this factory
+     */
+    public float getUtilizationRate(int hoursPassed) {
+        return 1f - ((float) this.hoursSpentWaiting / (float) hoursPassed);
     }
 
-    public float getUtilizationRate() {
-        return 0f;
+    public long getHoursSpentWaiting() {
+        return this.hoursSpentWaiting;
     }
 
     public int getToysProduced() {
         return this.toysProduced;
     }
 
-    public int getNumOfFurs() {
-        return numOfFurs;
+   public Map<Component, Integer> getComponents() {
+        return this.components;
+   }
+}
+
+class ToyRecipe {
+    private Map<Component, Integer> requiredComponents;
+
+    public ToyRecipe() {
+        this.requiredComponents = new HashMap<>();
     }
 
-    public void setNumOfFurs(int numberOfFurs) {
-        this.numOfFurs = numberOfFurs;
+    public boolean canProduceWith(Map<Component, Integer> componentList, int productionRate) {
+        for(var entry : componentList.entrySet()) {
+            if(!this.requiredComponents.containsKey(entry.getKey())) {
+                return false;
+            }
+            int requiredAmount = this.requiredComponents.get(entry.getKey()) * productionRate;
+            if(entry.getValue() < requiredAmount) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public int getNumOfFillings() {
-        return numOfFillings;
+    public int produce(Map<Component, Integer> componentsToConsume, int productionRate) {
+        for(var entry : componentsToConsume.entrySet()) {
+            int requiredAmount = this.requiredComponents.get(entry.getKey()) * productionRate;
+            entry.setValue(entry.getValue() - requiredAmount);
+        }
+        return productionRate;
     }
 
-    public void setNumOfFillings(int numberOfToppings) {
-        this.numOfFillings = numberOfToppings;
+    public void addComponent(Component component, int requiredAmount) {
+        this.requiredComponents.put(component, requiredAmount);
     }
 
-    public int getNumOfNoses() {
-        return numOfNoses;
+    public void removeComponent(Component component) {
+        this.requiredComponents.remove(component);
     }
 
-    public void setNumOfNoses(int numberOfNoses) {
-        this.numOfNoses = numberOfNoses;
-    }
-
-    public int getNumOfEyes() {
-        return numOfEyes;
-    }
-
-    public void setNumOfEyes(int numberOfEyes) {
-        this.numOfEyes = numberOfEyes;
+    public void removeAllComponents() {
+        this.requiredComponents.clear();
     }
 }
