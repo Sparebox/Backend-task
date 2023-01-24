@@ -6,18 +6,18 @@ public class ToyFactory {
     private long hoursSpentWaiting;
     private int toysProduced;
     private ToyRecipe toyRecipe;
-    private Map<Component, Integer> components;
+    private Map<Component, Integer> storedComponents;
 
     public ToyFactory(int productionRate) {
         this.productionRate = productionRate;
-        this.components = new HashMap<>();
+        this.storedComponents = new HashMap<>();
         this.toyRecipe = new ToyRecipe();
 
-        // Initialize with recipe to make weasel soft toys
-        this.components.put(Component.FUR, 0);
-        this.components.put(Component.FILLING, 0);
-        this.components.put(Component.NOSE, 0);
-        this.components.put(Component.EYE, 0);
+        // Initialize with recipe to make weasel™ soft toys
+        this.storedComponents.put(Component.FUR, 0);
+        this.storedComponents.put(Component.FILLING, 0);
+        this.storedComponents.put(Component.NOSE, 0);
+        this.storedComponents.put(Component.EYE, 0);
 
         this.toyRecipe.addComponent(Component.FUR, 1);
         this.toyRecipe.addComponent(Component.FILLING, 1);
@@ -33,18 +33,19 @@ public class ToyFactory {
      * @return The number of toys produced during this tick
      */
     public int tick() {
-        if(!this.toyRecipe.canProduceWith(this.components, this.productionRate)) {
+        if(!this.toyRecipe.canProduceWith(this.storedComponents, this.productionRate)) {
             // No toys could be produced during this tick
             this.hoursSpentWaiting++;
             return 0;
         }
 
         // Producing toys decreases the number of stored components and increases total toy count
-        this.toysProduced += this.toyRecipe.produce(this.components, this.productionRate);
+        this.toysProduced += this.toyRecipe.produce(this.storedComponents, this.productionRate);
 
         // Return toys produced during this tick
         return this.productionRate;
     }
+    
     /**
      * Calculates the utilization rate of this factory using the {@code hoursSpentWaiting} class variable.
      * @param hoursPassed Hours passed since this factory started operating
@@ -62,8 +63,8 @@ public class ToyFactory {
         return this.toysProduced;
     }
 
-   public Map<Component, Integer> getComponents() {
-        return this.components;
+   public Map<Component, Integer> getStoredComponents() {
+        return this.storedComponents;
    }
 }
 
@@ -74,6 +75,13 @@ class ToyRecipe {
         this.requiredComponents = new HashMap<>();
     }
 
+    /**
+     * Checks if this recipe can be produced with the provided {@code componentList} and {@code productionRate}.
+     * @param componentList Available components and their amounts
+     * @param productionRate Target number of products to be produced per tick (hour)
+     * @return True if the components provided fulfill the requirements to produce this recipe with the
+     *  given production rate otherwise returns false
+     */
     public boolean canProduceWith(Map<Component, Integer> componentList, int productionRate) {
         for(var entry : componentList.entrySet()) {
             if(!this.requiredComponents.containsKey(entry.getKey())) {
@@ -87,6 +95,12 @@ class ToyRecipe {
         return true;
     }
 
+    /**
+     * Consumes given components to produce this recipe with the rate of {@code productionRate}.
+     * @param componentsToConsume Components to use to produce the recipe
+     * @param productionRate Number of products to be produced per tick (hour)
+     * @return Number of products created. The same as {@code productionRate}
+     */
     public int produce(Map<Component, Integer> componentsToConsume, int productionRate) {
         for(var entry : componentsToConsume.entrySet()) {
             int requiredAmount = this.requiredComponents.get(entry.getKey()) * productionRate;

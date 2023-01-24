@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +65,7 @@ public class ComponentProducer {
      * @param delivery The delivery whose contents are to be delivered to the factory
      */
     private void finishDelivery(Delivery delivery) {
-        Map<Component, Integer> components = this.deliveryDestination.getComponents();
+        Map<Component, Integer> components = this.deliveryDestination.getStoredComponents();
         components.replace(this.component, components.get(this.component) + delivery.getUnits());
     }
 
