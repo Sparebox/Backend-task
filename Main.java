@@ -11,18 +11,18 @@ public class Main {
     static public long hoursPassedSinceStart = 0;
 
     public static void main(String[] args) throws InterruptedException {
-        ToyFactory toyFactory = new ToyFactory(500);
+        Factory factory = new Factory(500);
 
         // Create subcontractors
         List<ComponentProducer> subcontractors = new ArrayList<>();
-        subcontractors.add(new ComponentProducer(Component.FUR,     40, 200, 10, toyFactory, false));
-        subcontractors.add(new ComponentProducer(Component.FILLING, 450, 10, 12, toyFactory, false));
-        subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, toyFactory, true));
-        subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, toyFactory, false));
+        subcontractors.add(new ComponentProducer(Component.FUR,     40, 200, 10, factory, false));
+        subcontractors.add(new ComponentProducer(Component.FILLING, 450, 10, 12, factory, false));
+        subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, factory, true));
+        subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, factory, false));
 
         // Run the simulation until one million toys are produced
-        while(toyFactory.getToysProduced() < 1e6) {
-            toyFactory.tick();
+        while(factory.getUnitsProduced() < 1e6) {
+            factory.tick();
             for(var subcontractor : subcontractors) {
                 subcontractor.tick();
             }
@@ -33,7 +33,7 @@ public class Main {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm");
 
         System.out.println(String.format("Millionth toy produced after %d hours on %s", hoursPassedSinceStart, simEndTime.format(dateFormatter)));
-        System.out.println(String.format("Hours spent waiting: %d", toyFactory.getHoursSpentWaiting()));
-        System.out.println(String.format("Utilization rate: %.1f %%", toyFactory.getUtilizationRate(hoursPassedSinceStart) * 100f));
+        System.out.println(String.format("Hours spent waiting: %d", factory.getHoursSpentWaiting()));
+        System.out.println(String.format("Utilization rate: %.1f %%", factory.getUtilizationRate(hoursPassedSinceStart) * 100f));
     }
 }

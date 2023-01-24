@@ -1,8 +1,11 @@
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentProducer {
     public static final int SABOTAGE_PENALTY_HOURS = 12;
+    public static final float BAD_WEATHER_FAILURE_RATE = 0.2f;
+    public static final int BAD_WEATHER_DELAY_MULT = 2;
 
     private Component component;
     private int unitsPerHour;
@@ -10,7 +13,7 @@ public class ComponentProducer {
     private int hoursToDeliver;
     private int producedUnits;
     private List<Delivery> deliveries;
-    private ToyFactory deliveryDestination;
+    private Factory deliveryDestination;
     private boolean hasSabotageRisk;
     private int sabotageHoursCounter;
 
@@ -19,7 +22,7 @@ public class ComponentProducer {
         int unitsPerHour, 
         int packageSize, 
         int hoursToDeliver, 
-        ToyFactory deliveryDestination,
+        Factory deliveryDestination,
         boolean hasSabotageRisk
     ) {
         this.component = component;
@@ -55,7 +58,7 @@ public class ComponentProducer {
             }
         }
 
-        // Simulate possible sabotage attempt every week (7 days times 24 hours)
+        // Simulate possible sabotage attempt once every week (7 days times 24 hours)
         if(this.hasSabotageRisk && Main.hoursPassedSinceStart % (7 * 24) == 0) {
             // Approximately 10 % sabotage success rate
             boolean sabotageSucceeded = Main.random.nextInt(10) == 0;
@@ -69,16 +72,40 @@ public class ComponentProducer {
             this.producedUnits += this.unitsPerHour;
         }
 
-        // Check if there are enough components for packaging and delivering
-        if(this.producedUnits >= this.packageSize) {
-            this.producedUnits -= this.packageSize;
-            this.deliveries.add(new Delivery(this.component, this.packageSize, this.hoursToDeliver));
-        }
+        attemptDelivery();
         
         // Decrease sabotage penalty hours counter
         if(this.sabotageHoursCounter > 0) {
             this.sabotageHoursCounter--;
         }
+    }
+
+    /**
+     * Checks if there are enough components for a package.
+     * If there are enough components they will be packaged into a delivery unit and attempted to be sent.
+     * @return True if delivery is going to succeed, false if delivery will not reach the destination
+     */
+    private boolean attemptDelivery() {
+        // Check if there are enough components for packaging and delivering
+        if(this.producedUnits < this.packageSize) {
+            return false;
+        }
+        // Package produced units
+        this.producedUnits -= this.packageSize;
+
+        int deliveryHours;
+        // If the current simulation month is December the delivery time doubles and 20 % of deliveries fail
+        if(Main.SIM_START_TIME.plusHours(Main.hoursPassedSinceStart).getMonth() == Month.DECEMBER) {
+            deliveryHours = BAD_WEATHER_DELAY_MULT * this.hoursToDeliver;
+            // 20 % chance to fail delivery
+            if(Main.random.nextInt(5) == 0) {
+                return false;
+            }
+        } else {
+            deliveryHours = this.hoursToDeliver;
+        }
+        this.deliveries.add(new Delivery(this.component, this.packageSize, deliveryHours));
+        return true;
     }
 
     // Getters
@@ -114,7 +141,7 @@ class Delivery {
      * Sends the contents of this delivery to the destination factory.
      * @param destination The destination factory to be delivered to
      */
-    public void finishDelivery(ToyFactory destination) {
+    public void finishDelivery(Factory destination) {
         destination.getStoredComponents().compute(this.component, (k, v) -> v + this.units);
     }
 
