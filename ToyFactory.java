@@ -51,7 +51,7 @@ public class ToyFactory {
      * @param hoursPassed Hours passed since this factory started operating
      * @return The utilization rate of this factory
      */
-    public float getUtilizationRate(int hoursPassed) {
+    public float getUtilizationRate(long hoursPassed) {
         return 1f - ((float) this.hoursSpentWaiting / (float) hoursPassed);
     }
 

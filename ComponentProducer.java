@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentProducer {
+    public static final int SABOTAGE_PENALTY_HOURS = 12;
+
     private Component component;
     private int unitsPerHour;
     private int packageSize;
@@ -9,13 +11,16 @@ public class ComponentProducer {
     private int producedUnits;
     private List<Delivery> deliveries;
     private ToyFactory deliveryDestination;
+    private boolean hasSabotageRisk;
+    private int sabotageHoursCounter;
 
     public ComponentProducer(
         Component component,
         int unitsPerHour, 
         int packageSize, 
         int hoursToDeliver, 
-        ToyFactory deliveryDestination
+        ToyFactory deliveryDestination,
+        boolean hasSabotageRisk
     ) {
         this.component = component;
         this.unitsPerHour = unitsPerHour;
@@ -23,6 +28,7 @@ public class ComponentProducer {
         this.hoursToDeliver = hoursToDeliver;
         this.deliveries = new ArrayList<>();
         this.deliveryDestination = deliveryDestination;
+        this.hasSabotageRisk = hasSabotageRisk;
     }
 
     /**
@@ -49,13 +55,29 @@ public class ComponentProducer {
             }
         }
 
-        // Produce components
-        this.producedUnits += this.unitsPerHour;
+        // Simulate possible sabotage attempt every week (7 days times 24 hours)
+        if(this.hasSabotageRisk && Main.hoursPassedSinceStart % (7 * 24) == 0) {
+            // Approximately 10 % sabotage success rate
+            boolean sabotageSucceeded = Main.random.nextInt(10) == 0;
+            if(sabotageSucceeded) {
+                this.sabotageHoursCounter = SABOTAGE_PENALTY_HOURS;
+            }
+        }
+
+        // Produce components if there is no sabotage risk or sabotage penalty has ended
+        if(!this.hasSabotageRisk || this.sabotageHoursCounter == 0) {
+            this.producedUnits += this.unitsPerHour;
+        }
 
         // Check if there are enough components for packaging and delivering
         if(this.producedUnits >= this.packageSize) {
             this.producedUnits -= this.packageSize;
             this.deliveries.add(new Delivery(this.component, this.packageSize, this.hoursToDeliver));
+        }
+        
+        // Decrease sabotage penalty hours counter
+        if(this.sabotageHoursCounter > 0) {
+            this.sabotageHoursCounter--;
         }
     }
 
