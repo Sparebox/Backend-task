@@ -83,12 +83,14 @@ class ToyRecipe {
      *  given production rate otherwise returns false
      */
     public boolean canProduceWith(Map<Component, Integer> componentList, int productionRate) {
-        for(var entry : componentList.entrySet()) {
-            if(!this.requiredComponents.containsKey(entry.getKey())) {
+        for(var requirement : this.requiredComponents.entrySet()) {
+            if(!componentList.containsKey(requirement.getKey())) {
+                // Required component is not in the given components
                 return false;
             }
-            int requiredAmount = this.requiredComponents.get(entry.getKey()) * productionRate;
-            if(entry.getValue() < requiredAmount) {
+            int requiredAmount = requirement.getValue() * productionRate;
+            if(componentList.get(requirement.getKey()) < requiredAmount) {
+                // Not enough components of this type to begin production
                 return false;
             }
         }
@@ -97,14 +99,15 @@ class ToyRecipe {
 
     /**
      * Consumes given components to produce this recipe with the rate of {@code productionRate}.
+     * It is assumed that this recipe can be produced with the components given.
      * @param componentsToConsume Components to use to produce the recipe
      * @param productionRate Number of products to be produced per tick (hour)
      * @return Number of products created. The same as {@code productionRate}
      */
     public int produce(Map<Component, Integer> componentsToConsume, int productionRate) {
-        for(var entry : componentsToConsume.entrySet()) {
-            int requiredAmount = this.requiredComponents.get(entry.getKey()) * productionRate;
-            entry.setValue(entry.getValue() - requiredAmount);
+        for(var requirement : this.requiredComponents.entrySet()) {
+            int requiredAmount = requirement.getValue() * productionRate;
+            componentsToConsume.compute(requirement.getKey(), (k, v) -> v - requiredAmount);
         }
         return productionRate;
     }

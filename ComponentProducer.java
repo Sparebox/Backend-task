@@ -1,13 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ComponentProducer {
     private Component component;
     private int unitsPerHour;
     private int packageSize;
     private int hoursToDeliver;
-    private int units;
+    private int producedUnits;
     private List<Delivery> deliveries;
     private ToyFactory deliveryDestination;
 
@@ -42,7 +41,7 @@ public class ComponentProducer {
             var delivery = iter.next();
             if(delivery.getHoursTillArrival() == 0) {
                 // Remove delivery from the list as it has been delivered
-                finishDelivery(delivery);
+                delivery.finishDelivery(this.deliveryDestination);
                 iter.remove();
             } else {
                 // This delivery is now one hour closer to arrival
@@ -51,22 +50,13 @@ public class ComponentProducer {
         }
 
         // Produce components
-        this.units += this.unitsPerHour;
+        this.producedUnits += this.unitsPerHour;
 
         // Check if there are enough components for packaging and delivering
-        if(this.units >= this.packageSize) {
-            this.units -= this.packageSize;
-            this.deliveries.add(new Delivery(this.packageSize, this.hoursToDeliver));
+        if(this.producedUnits >= this.packageSize) {
+            this.producedUnits -= this.packageSize;
+            this.deliveries.add(new Delivery(this.component, this.packageSize, this.hoursToDeliver));
         }
-    }
-
-    /**
-     * Sends the contents of the supplied delivery to the destination factory.
-     * @param delivery The delivery whose contents are to be delivered to the factory
-     */
-    private void finishDelivery(Delivery delivery) {
-        Map<Component, Integer> components = this.deliveryDestination.getStoredComponents();
-        components.replace(this.component, components.get(this.component) + delivery.getUnits());
     }
 
     // Getters
@@ -84,13 +74,26 @@ public class ComponentProducer {
     }
 }
 
+/**
+ * This class represents one delivery unit containing the type of component, quantity and time remaining until arrival.
+ */
 class Delivery {
+    private Component component;
     private int units;
     private int hoursTillArrival;
 
-    public Delivery(int units, int hoursTillArrival) {
+    public Delivery(Component component, int units, int hoursTillArrival) {
+        this.component = component;
         this.units = units;
         this.hoursTillArrival = hoursTillArrival;
+    }
+
+     /**
+     * Sends the contents of this delivery to the destination factory.
+     * @param destination The destination factory to be delivered to
+     */
+    public void finishDelivery(ToyFactory destination) {
+        destination.getStoredComponents().compute(this.component, (k, v) -> v + this.units);
     }
 
     public int getUnits() {

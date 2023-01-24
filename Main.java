@@ -17,7 +17,7 @@ public class Main {
         subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, toyFactory));
         subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, toyFactory));
 
-        // Run the simulation until a million toys are produced
+        // Run the simulation until one million toys are produced
         while(toyFactory.getToysProduced() < 1e6) {
             toyFactory.tick();
             for(var subcontractor : subcontractors) {
