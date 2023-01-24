@@ -2,23 +2,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Main {
     static public final LocalDateTime SIM_START_TIME = LocalDateTime.of(2023, 4, 1, 0, 0);
 
-    static public Random random = new Random();
     static public long hoursPassedSinceStart = 0;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         Factory factory = new Factory(500);
 
         // Create subcontractors
         List<ComponentProducer> subcontractors = new ArrayList<>();
-        subcontractors.add(new ComponentProducer(Component.FUR,     40, 200, 10, factory, false));
-        subcontractors.add(new ComponentProducer(Component.FILLING, 450, 10, 12, factory, false));
-        subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, factory, true));
-        subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, factory, false));
+        subcontractors.add(new ComponentProducer(Component.FUR,     40, 200, 10, factory));
+        subcontractors.add(new ComponentProducer(Component.FILLING, 450, 10, 12, factory));
+        subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, factory));
+        subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, factory));
 
         // Run the simulation until one million toys are produced
         while(factory.getUnitsProduced() < 1e6) {

@@ -1,12 +1,11 @@
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a producer that makes one type of component at the rate of {@code unitsPerHour}
+ * and sends them to a factory defined by {@code deliveryDestination} when {@code packageSize} components have accumulated.
+ */
 public class ComponentProducer {
-    public static final int SABOTAGE_PENALTY_HOURS = 12;
-    public static final float BAD_WEATHER_FAILURE_RATE = 0.2f;
-    public static final int BAD_WEATHER_DELAY_MULT = 2;
-
     private Component component;
     private int unitsPerHour;
     private int packageSize;
@@ -14,16 +13,13 @@ public class ComponentProducer {
     private int producedUnits;
     private List<Delivery> deliveries;
     private Factory deliveryDestination;
-    private boolean hasSabotageRisk;
-    private int sabotageHoursCounter;
 
     public ComponentProducer(
         Component component,
         int unitsPerHour, 
         int packageSize, 
         int hoursToDeliver, 
-        Factory deliveryDestination,
-        boolean hasSabotageRisk
+        Factory deliveryDestination
     ) {
         this.component = component;
         this.unitsPerHour = unitsPerHour;
@@ -31,7 +27,6 @@ public class ComponentProducer {
         this.hoursToDeliver = hoursToDeliver;
         this.deliveries = new ArrayList<>();
         this.deliveryDestination = deliveryDestination;
-        this.hasSabotageRisk = hasSabotageRisk;
     }
 
     /**
@@ -58,73 +53,85 @@ public class ComponentProducer {
             }
         }
 
-        // Simulate possible sabotage attempt once every week (7 days times 24 hours)
-        if(this.hasSabotageRisk && Main.hoursPassedSinceStart % (7 * 24) == 0) {
-            // Approximately 10 % sabotage success rate
-            boolean sabotageSucceeded = Main.random.nextInt(10) == 0;
-            if(sabotageSucceeded) {
-                this.sabotageHoursCounter = SABOTAGE_PENALTY_HOURS;
-            }
-        }
-
-        // Produce components if there is no sabotage risk or sabotage penalty has ended
-        if(!this.hasSabotageRisk || this.sabotageHoursCounter == 0) {
-            this.producedUnits += this.unitsPerHour;
-        }
+        // Produce components
+        this.producedUnits += this.unitsPerHour;
 
         attemptDelivery();
-        
-        // Decrease sabotage penalty hours counter
-        if(this.sabotageHoursCounter > 0) {
-            this.sabotageHoursCounter--;
-        }
     }
 
     /**
-     * Checks if there are enough components for a package.
-     * If there are enough components they will be packaged into a delivery unit and attempted to be sent.
-     * @return True if delivery is going to succeed, false if delivery will not reach the destination
+     * Checks if there are enough components for one package.
+     * If there are enough components they will be packaged into a delivery unit and sent.
+     * @return True if a delivery could be made otherwise false
      */
     private boolean attemptDelivery() {
         // Check if there are enough components for packaging and delivering
         if(this.producedUnits < this.packageSize) {
             return false;
         }
-        // Package produced units
+        // Package and send produced units
         this.producedUnits -= this.packageSize;
-
-        int deliveryHours;
-        // If the current simulation month is December the delivery time doubles and 20 % of deliveries fail
-        if(Main.SIM_START_TIME.plusHours(Main.hoursPassedSinceStart).getMonth() == Month.DECEMBER) {
-            deliveryHours = BAD_WEATHER_DELAY_MULT * this.hoursToDeliver;
-            // 20 % chance to fail delivery
-            if(Main.random.nextInt(5) == 0) {
-                return false;
-            }
-        } else {
-            deliveryHours = this.hoursToDeliver;
-        }
-        this.deliveries.add(new Delivery(this.component, this.packageSize, deliveryHours));
+        this.deliveries.add(new Delivery(this.component, this.packageSize, this.hoursToDeliver));
         return true;
     }
 
-    // Getters
+    // Getters and setters
+
+    public Component getComponent() {
+        return component;
+    }
+
+    public void setComponent(Component component) {
+        this.component = component;
+    }
 
     public int getUnitsPerHour() {
-        return this.unitsPerHour;
+        return unitsPerHour;
+    }
+
+    public void setUnitsPerHour(int unitsPerHour) {
+        this.unitsPerHour = unitsPerHour;
     }
 
     public int getPackageSize() {
-        return this.packageSize;
+        return packageSize;
+    }
+
+    public void setPackageSize(int packageSize) {
+        this.packageSize = packageSize;
     }
 
     public int getHoursToDeliver() {
-        return this.hoursToDeliver;
+        return hoursToDeliver;
+    }
+
+    public void setHoursToDeliver(int hoursToDeliver) {
+        this.hoursToDeliver = hoursToDeliver;
+    }
+
+    public int getProducedUnits() {
+        return producedUnits;
+    }
+
+    public void setProducedUnits(int producedUnits) {
+        this.producedUnits = producedUnits;
+    }
+
+    public List<Delivery> getDeliveries() {
+        return deliveries;
+    }
+
+    public Factory getDeliveryDestination() {
+        return deliveryDestination;
+    }
+
+    public void setDeliveryDestination(Factory deliveryDestination) {
+        this.deliveryDestination = deliveryDestination;
     }
 }
 
 /**
- * This class represents one delivery unit containing the type of component, quantity and time remaining until arrival.
+ * This class represents a delivery unit containing the type of component, quantity and time remaining until arrival.
  */
 class Delivery {
     private Component component;

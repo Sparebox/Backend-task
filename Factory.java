@@ -1,6 +1,9 @@
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a factory that makes products from components determined by the supplied recipe.
+ */
 public class Factory {
     private int productionRate; // Products per hour
     private long hoursSpentWaiting;
@@ -53,6 +56,16 @@ public class Factory {
      */
     public float getUtilizationRate(long hoursPassed) {
         return 1f - ((float) this.hoursSpentWaiting / (float) hoursPassed);
+    }
+
+    // Getters and setters
+
+    public void setProductRecipe(ProductRecipe recipe) {
+        this.productRecipe = recipe;
+    }
+
+    public ProductRecipe getProductRecipe() {
+        return this.productRecipe;
     }
 
     public long getHoursSpentWaiting() {
