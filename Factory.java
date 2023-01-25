@@ -1,6 +1,10 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+/**
+ * Represents a factory that makes products from components determined by the supplied recipe.
+ */
 public class Factory {
     private int productionRate; // Products per hour
     private long hoursSpentWaiting;
@@ -12,17 +16,6 @@ public class Factory {
         this.productionRate = productionRate;
         this.storedComponents = new HashMap<>();
         this.productRecipe = new ProductRecipe();
-
-        // Initialize with recipe to make weasel™ soft toys
-        this.storedComponents.put(Component.FUR, 0);
-        this.storedComponents.put(Component.FILLING, 0);
-        this.storedComponents.put(Component.NOSE, 0);
-        this.storedComponents.put(Component.EYE, 0);
-
-        this.productRecipe.addComponent(Component.FUR, 1);
-        this.productRecipe.addComponent(Component.FILLING, 1);
-        this.productRecipe.addComponent(Component.NOSE, 1);
-        this.productRecipe.addComponent(Component.EYE, 2);
     }
 
     /**
@@ -55,6 +48,16 @@ public class Factory {
         return 1f - ((float) this.hoursSpentWaiting / (float) hoursPassed);
     }
 
+    // Getters and setters
+
+    public void setProductRecipe(ProductRecipe recipe) {
+        for(var component : recipe.getComponents()) {
+            // Initialize stored components with zero amounts if they are not present beforehand
+            this.storedComponents.putIfAbsent(component, 0);
+        }
+        this.productRecipe = recipe;
+    }
+
     public long getHoursSpentWaiting() {
         return this.hoursSpentWaiting;
     }
@@ -69,7 +72,7 @@ public class Factory {
 }
 
 /**
- * Represents a list of required components in order to create a product.
+ * Represents a map of required components in order to create a product.
  * Use the {@code addComponent} and {@code removeComponent} methods to add a component or remove a component from 
  * the recipe respectively.
  */
@@ -117,6 +120,15 @@ class ProductRecipe {
         return productionRate;
     }
 
+    public Set<Component> getComponents() {
+        return this.requiredComponents.keySet();
+    }
+
+    /**
+     * Define a required component for this recipe.
+     * @param component The required component for production
+     * @param requiredAmount The quantity of this component that is required to complete the recipe
+     */
     public void addComponent(Component component, int requiredAmount) {
         this.requiredComponents.put(component, requiredAmount);
     }

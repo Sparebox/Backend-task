@@ -11,7 +11,16 @@ public class Main {
     static public long hoursPassedSinceStart = 0;
 
     public static void main(String[] args) throws InterruptedException {
+         // Create a factory with production rate of 500 products per hour
         Factory factory = new Factory(500);
+
+        // Initialize factory with recipe to make weasel™ soft toys
+        ProductRecipe weaselSoftToy = new ProductRecipe();
+        weaselSoftToy.addComponent(Component.FUR, 1);
+        weaselSoftToy.addComponent(Component.FILLING, 1);
+        weaselSoftToy.addComponent(Component.NOSE, 1);
+        weaselSoftToy.addComponent(Component.EYE, 2);
+        factory.setProductRecipe(weaselSoftToy);
 
         // Create subcontractors
         List<ComponentProducer> subcontractors = new ArrayList<>();
