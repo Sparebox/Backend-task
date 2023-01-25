@@ -94,10 +94,10 @@ public class ComponentProducer {
         this.producedUnits -= this.packageSize;
 
         int deliveryHours;
-        // If the current simulation month is December the delivery time doubles and 20 % of deliveries fail
+        // If the current simulation month is December the delivery time changes and 20 % of deliveries fail
         if(Main.SIM_START_TIME.plusHours(Main.hoursPassedSinceStart).getMonth() == Month.DECEMBER) {
             deliveryHours = BAD_WEATHER_DELAY_MULT * this.hoursToDeliver;
-            // 20 % chance to fail delivery
+            // Approx. 20 % chance to fail delivery
             if(Main.random.nextInt(5) == 0) {
                 return false;
             }

@@ -22,7 +22,7 @@ public class Factory {
      * Advances this factory one step (hour) forward in the simulation.
      * The factory produces the supplied recipe if there are enough components available.
      * <p>
-     * Otherwise adds one hour to waiting hours counter and does nothing.
+     * Otherwise adds one hour to waiting hours counter and returns 0.
      * @return The number of products produced during this tick
      */
     public int tick() {
@@ -44,8 +44,8 @@ public class Factory {
      * @param hoursPassed Hours passed since this factory started operating
      * @return The utilization rate of this factory
      */
-    public float getUtilizationRate(long hoursPassed) {
-        return 1f - ((float) this.hoursSpentWaiting / (float) hoursPassed);
+    public double getUtilizationRate(long hoursPassed) {
+        return 1.0 - ((double) this.hoursSpentWaiting / (double) hoursPassed);
     }
 
     // Getters and setters
