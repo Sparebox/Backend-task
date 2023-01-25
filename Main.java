@@ -23,7 +23,7 @@ public class Main {
         // Create subcontractors
         List<ComponentProducer> subcontractors = new ArrayList<>();
         subcontractors.add(new ComponentProducer(Component.FUR,     40, 200, 10, factory));
-        subcontractors.add(new ComponentProducer(Component.FILLING, 450, 10, 12, factory));
+        subcontractors.add(new ComponentProducer(Component.FILLING, 45, 10, 12, factory));
         subcontractors.add(new ComponentProducer(Component.NOSE,    60, 100, 8, factory));
         subcontractors.add(new ComponentProducer(Component.EYE,     90, 300, 14, factory));
 
