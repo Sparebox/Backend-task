@@ -41,6 +41,6 @@ public class Main {
 
         System.out.println(String.format("Millionth toy produced after %d hours on %s", hoursPassedSinceStart, simEndTime.format(dateFormatter)));
         System.out.println(String.format("Hours spent waiting: %d", factory.getHoursSpentWaiting()));
-        System.out.println(String.format("Utilization rate: %.1f %%", factory.getUtilizationRate(hoursPassedSinceStart) * 100f));
+        System.out.println(String.format("Utilization rate: %.1f %%", factory.getUtilizationRate(hoursPassedSinceStart) * 100.0));
     }
 }
